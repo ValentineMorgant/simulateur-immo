@@ -1,0 +1,128 @@
+<h2>Onglet Simulation — calculs en temps réel</h2>
+<p class="subtitle">Sliders interactifs, résultats qui se mettent à jour instantanément</p>
+
+<div class="mockup">
+  <div class="mockup-header">Simulation — Charlotte &amp; Valentine</div>
+  <div class="mockup-body" style="padding: 20px; background: #f0fdf4; font-family: sans-serif;">
+
+    <!-- KPIs -->
+    <div style="background: white; border-radius: 10px; padding: 16px; border: 1px solid #bbf7d0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-bottom: 16px; overflow: hidden;">
+      <div style="text-align: center; padding: 12px;">
+        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px;">CAPACITÉ D'EMPRUNT</div>
+        <div style="font-size: 22px; font-weight: 800; color: #14532d;">312 500 €</div>
+      </div>
+      <div style="text-align: center; padding: 12px; border-left: 1px solid #f0fdf4;">
+        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px;">MENSUALITÉ</div>
+        <div style="font-size: 22px; font-weight: 800; color: #14532d;">1 420 €</div>
+      </div>
+      <div style="text-align: center; padding: 12px; border-left: 1px solid #f0fdf4;">
+        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px;">TAUX D'ENDETTEMENT</div>
+        <div style="font-size: 22px; font-weight: 800; color: #16a34a;">19,9%</div>
+        <div style="font-size: 10px; color: #64748b; margin-top: 2px;">/ 35% max ✓</div>
+      </div>
+      <div style="text-align: center; padding: 12px; border-left: 1px solid #f0fdf4;">
+        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px;">PRIX MAX DU BIEN</div>
+        <div style="font-size: 22px; font-weight: 800; color: #14532d;">342 500 €</div>
+        <div style="font-size: 10px; color: #64748b; margin-top: 2px;">emprunt + apport</div>
+      </div>
+    </div>
+
+    <!-- Barre de progression endettement -->
+    <div style="background: white; border-radius: 10px; padding: 14px 16px; border: 1px solid #bbf7d0; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-bottom: 6px;">
+        <span>Taux d'endettement : <strong style="color: #16a34a;">19,9%</strong></span>
+        <span>Limite bancaire : <strong style="color: #64748b;">35%</strong></span>
+      </div>
+      <div style="height: 8px; background: #dcfce7; border-radius: 4px; position: relative;">
+        <div style="height: 8px; width: 57%; background: linear-gradient(90deg, #16a34a, #4ade80); border-radius: 4px;"></div>
+        <div style="position: absolute; top: -2px; left: 35%; width: 2px; height: 12px; background: #ef4444; border-radius: 1px;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; margin-top: 4px;"><span>0%</span><span style="color: #ef4444; font-weight: 600;">35% ↑</span><span>50%</span></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+      <!-- Sliders -->
+      <div style="background: white; border-radius: 10px; padding: 16px; border: 1px solid #bbf7d0;">
+        <div style="font-size: 12px; font-weight: 700; color: #14532d; margin-bottom: 14px;">Paramètres du prêt</div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span style="color: #64748b;">Taux d'intérêt</span><span style="color: #16a34a; font-weight: 700;">3,50 %</span></div>
+          <div style="height: 6px; background: #dcfce7; border-radius: 3px; position: relative;">
+            <div style="height: 6px; width: 42%; background: #16a34a; border-radius: 3px;"></div>
+            <div style="position: absolute; top: -5px; left: calc(42% - 7px); width: 16px; height: 16px; background: #16a34a; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; margin-top: 4px;"><span>0,5%</span><span>6%</span></div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span style="color: #64748b;">Durée</span><span style="color: #16a34a; font-weight: 700;">25 ans</span></div>
+          <div style="height: 6px; background: #dcfce7; border-radius: 3px; position: relative;">
+            <div style="height: 6px; width: 78%; background: #16a34a; border-radius: 3px;"></div>
+            <div style="position: absolute; top: -5px; left: calc(78% - 7px); width: 16px; height: 16px; background: #16a34a; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; margin-top: 4px;"><span>5 ans</span><span>30 ans</span></div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span style="color: #64748b;">Apport</span><span style="color: #16a34a; font-weight: 700;">30 000 €</span></div>
+          <div style="height: 6px; background: #dcfce7; border-radius: 3px; position: relative;">
+            <div style="height: 6px; width: 15%; background: #16a34a; border-radius: 3px;"></div>
+            <div style="position: absolute; top: -5px; left: calc(15% - 7px); width: 16px; height: 16px; background: #16a34a; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; margin-top: 4px;"><span>0 €</span><span>200 000 €</span></div>
+        </div>
+
+        <!-- PTZ -->
+        <div style="border-top: 1px solid #f0fdf4; padding-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 11px; color: #64748b;">Prêt à Taux Zéro (PTZ)</span>
+            <div style="width: 36px; height: 20px; background: #dcfce7; border-radius: 10px; position: relative; border: 1px solid #bbf7d0;">
+              <div style="width: 16px; height: 16px; background: #94a3b8; border-radius: 50%; position: absolute; top: 1px; left: 2px;"></div>
+            </div>
+          </div>
+          <div style="font-size: 10px; color: #94a3b8;">Activer si éligible (neuf, primo-accédant, zone A/B)</div>
+        </div>
+      </div>
+
+      <!-- Ancien vs Neuf -->
+      <div style="background: white; border-radius: 10px; padding: 16px; border: 1px solid #bbf7d0;">
+        <div style="font-size: 12px; font-weight: 700; color: #14532d; margin-bottom: 14px;">Comparatif Ancien vs Neuf</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+          <div style="background: #f0fdf4; border-radius: 8px; padding: 12px; text-align: center;">
+            <div style="font-size: 10px; color: #64748b; margin-bottom: 6px; font-weight: 600;">ANCIEN</div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 9px; color: #94a3b8; display: block; margin-bottom: 2px;">PRIX/m²</label>
+              <div style="border: 1px solid #bbf7d0; border-radius: 4px; padding: 5px 8px; font-size: 13px; font-weight: 700; color: #14532d; background: white;">3 500 €</div>
+            </div>
+            <div style="font-size: 11px; color: #64748b;">Surface accessible</div>
+            <div style="font-size: 18px; font-weight: 800; color: #16a34a;">97 m²</div>
+          </div>
+          <div style="background: #f0fdf4; border-radius: 8px; padding: 12px; text-align: center;">
+            <div style="font-size: 10px; color: #64748b; margin-bottom: 6px; font-weight: 600;">NEUF</div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 9px; color: #94a3b8; display: block; margin-bottom: 2px;">PRIX/m²</label>
+              <div style="border: 1px solid #bbf7d0; border-radius: 4px; padding: 5px 8px; font-size: 13px; font-weight: 700; color: #14532d; background: white;">4 500 €</div>
+            </div>
+            <div style="font-size: 11px; color: #64748b;">Surface accessible</div>
+            <div style="font-size: 18px; font-weight: 800; color: #16a34a;">76 m²</div>
+          </div>
+        </div>
+
+        <div style="background: #f0fdf4; border-radius: 8px; padding: 10px; font-size: 11px; color: #64748b; text-align: center;">
+          Les prix/m² sont <strong style="color: #14532d;">modifiables</strong> pour simuler n'importe quelle zone
+        </div>
+
+        <!-- Détail coût total -->
+        <div style="margin-top: 12px; border-top: 1px solid #f0fdf4; padding-top: 12px;">
+          <div style="font-size: 11px; color: #14532d; font-weight: 600; margin-bottom: 6px;">Coût total du crédit</div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;"><span style="color: #64748b;">Capital emprunté</span><span style="color: #14532d; font-weight: 600;">312 500 €</span></div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;"><span style="color: #64748b;">Intérêts totaux</span><span style="color: #64748b;">139 000 €</span></div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px;"><span style="color: #64748b;">Coût total remboursé</span><span style="font-weight: 700; color: #14532d;">451 500 €</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
