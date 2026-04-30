@@ -6,6 +6,7 @@ import { SectionTabs } from './components/SectionTabs'
 import { ProfilTab } from './components/tabs/ProfilTab'
 import { SimulationTab } from './components/tabs/SimulationTab'
 import { SecteursTab } from './components/tabs/SecteursTab'
+import { DossierTab } from './components/tabs/DossierTab'
 
 type Section = 'profil' | 'simulation' | 'secteurs' | 'dossier'
 
@@ -21,7 +22,7 @@ export default function App() {
         {section === 'profil'     && <ProfilTab />}
         {section === 'simulation' && <SimulationTab />}
         {section === 'secteurs'   && <SecteursTab />}
-        {section === 'dossier'    && <p className="text-slate-400 text-sm">Onglet : {section}</p>}
+        {section === 'dossier'    && <DossierTab />}
       </main>
     </div>
   )
