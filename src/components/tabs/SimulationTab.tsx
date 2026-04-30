@@ -1,11 +1,8 @@
 // src/components/tabs/SimulationTab.tsx
 import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
+import { euros } from '../../utils/format'
 import type { Simulation } from '../../types'
-
-function euros(n: number) {
-  return Math.round(n).toLocaleString('fr-FR') + ' €'
-}
 
 function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (

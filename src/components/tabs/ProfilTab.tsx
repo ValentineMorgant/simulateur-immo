@@ -1,11 +1,8 @@
 // src/components/tabs/ProfilTab.tsx
 import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
+import { euros } from '../../utils/format'
 import type { AcheteurData, Simulation } from '../../types'
-
-function euros(n: number) {
-  return n.toLocaleString('fr-FR') + ' €'
-}
 
 function NumInput({ label, value, onChange, suffix = '€' }: {
   label: string
@@ -85,6 +82,7 @@ export function ProfilTab() {
         <h3 className="text-xs font-bold text-green-900 mb-3">Situation actuelle</h3>
         <NumInput label="Loyer mensuel actuel" value={active.loyerActuel} onChange={v => set('loyerActuel', v)} suffix="€/mois" />
         <NumInput label="Aide CAF mensuelle" value={active.aideCaf} onChange={v => set('aideCaf', v)} suffix="€/mois" />
+        <p className="text-xs text-slate-400 mt-2">Ces informations sont données à titre indicatif.</p>
       </div>
 
       <div className="bg-white rounded-xl p-4 border border-green-200">
@@ -93,8 +91,8 @@ export function ProfilTab() {
         <div className="bg-green-50 rounded-lg p-3 border border-green-200 mt-2 space-y-1.5">
           <p className="text-xs text-slate-400 uppercase tracking-wide font-semibold mb-2">Synthèse</p>
           <div className="flex justify-between text-xs"><span className="text-slate-500">Revenus nets totaux / an</span><strong className="text-green-900">{euros(r.revenusAnnuels)}</strong></div>
-          <div className="flex justify-between text-xs"><span className="text-slate-500">Revenus nets / mois</span><strong className="text-green-900">{euros(Math.round(r.revenusMensuels))}</strong></div>
-          <div className="flex justify-between text-xs"><span className="text-slate-500">Mensualité max (35%)</span><strong className="text-green-600">{euros(Math.round(r.mensualiteMax))}</strong></div>
+          <div className="flex justify-between text-xs"><span className="text-slate-500">Revenus nets / mois</span><strong className="text-green-900">{euros(r.revenusMensuels)}</strong></div>
+          <div className="flex justify-between text-xs"><span className="text-slate-500">Mensualité max (35%)</span><strong className="text-green-600">{euros(r.mensualiteMax)}</strong></div>
         </div>
       </div>
     </div>

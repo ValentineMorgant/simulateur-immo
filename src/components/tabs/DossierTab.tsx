@@ -30,7 +30,10 @@ export function DossierTab() {
   let statusText = 'Dossier incomplet'
   if (pct === 100) statusText = 'Dossier complet — prêt pour la banque ✓'
   else if (pct >= 50) statusText = `Dossier à compléter — ${total - checked} document${total - checked > 1 ? 's' : ''} manquant${total - checked > 1 ? 's' : ''}`
-  else statusText = `Dossier incomplet — ${total - checked} documents manquants`
+  else {
+    const missing = total - checked
+    statusText = `Dossier incomplet — ${missing} document${missing > 1 ? 's' : ''} manquant${missing > 1 ? 's' : ''}`
+  }
 
   return (
     <div className="space-y-4">

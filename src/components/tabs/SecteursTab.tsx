@@ -4,7 +4,7 @@ import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
 import { SECTEURS } from '../../data/secteurs'
 
-type SortKey = 'ville' | 'trajetMin' | 'prixAncien' | 'prixNeuf' | 'surfaceAncien'
+type SortKey = 'ville' | 'trajetMin' | 'prixAncien' | 'prixNeuf' | 'surfaceAncien' | 'surfaceNeuf'
 type Filter = 'all' | 'A' | 'B' | 'C' | 'D' | 'E'
 
 const LINE_COLORS: Record<string, string> = {
@@ -13,6 +13,25 @@ const LINE_COLORS: Record<string, string> = {
   C: 'bg-yellow-100 text-yellow-800',
   D: 'bg-green-100 text-green-700',
   E: 'bg-purple-100 text-purple-700',
+}
+
+type ThProps = {
+  label: string
+  k: SortKey
+  sortKey: SortKey
+  sortAsc: boolean
+  onToggle: (k: SortKey) => void
+}
+
+function Th({ label, k, sortKey, sortAsc, onToggle }: ThProps) {
+  return (
+    <th
+      onClick={() => onToggle(k)}
+      className="px-4 py-2.5 text-left text-xs font-semibold tracking-wide cursor-pointer select-none hover:bg-green-800 transition-colors"
+    >
+      {label} {sortKey === k ? (sortAsc ? '↑' : '↓') : ''}
+    </th>
+  )
 }
 
 export function SecteursTab() {
@@ -46,17 +65,6 @@ export function SecteursTab() {
       })
   }, [filter, sortKey, sortAsc, r.prixMaxBien])
 
-  function Th({ label, k }: { label: string; k: SortKey }) {
-    return (
-      <th
-        onClick={() => toggleSort(k)}
-        className="px-4 py-2.5 text-left text-xs font-semibold tracking-wide cursor-pointer select-none hover:bg-green-800 transition-colors"
-      >
-        {label} {sortKey === k ? (sortAsc ? '↑' : '↓') : ''}
-      </th>
-    )
-  }
-
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
@@ -81,12 +89,13 @@ export function SecteursTab() {
         <table className="w-full text-sm">
           <thead className="bg-green-900 text-white text-xs">
             <tr>
-              <Th label="Ville" k="ville" />
+              <Th label="Ville" k="ville" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
               <th className="px-4 py-2.5 text-left text-xs font-semibold">Ligne(s)</th>
-              <Th label="Trajet" k="trajetMin" />
-              <Th label="Prix ancien /m²" k="prixAncien" />
-              <Th label="Prix neuf /m²" k="prixNeuf" />
-              <Th label="Surface accessible" k="surfaceAncien" />
+              <Th label="Trajet" k="trajetMin" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
+              <Th label="Prix ancien /m²" k="prixAncien" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
+              <Th label="Prix neuf /m²" k="prixNeuf" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
+              <Th label="Surface accessible" k="surfaceAncien" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
+              <Th label="Surface (neuf)" k="surfaceNeuf" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
             </tr>
           </thead>
           <tbody>
@@ -112,6 +121,10 @@ export function SecteursTab() {
                 <td className="px-4 py-3">
                   <span className="text-lg font-extrabold text-green-600">{Math.floor(s.surfaceAncien)} m²</span>
                   <span className="text-xs text-slate-400 ml-1">(ancien)</span>
+                </td>
+                <td className="px-4 py-3">
+                  <span className="text-lg font-extrabold text-green-600">{Math.floor(s.surfaceNeuf)} m²</span>
+                  <span className="text-xs text-slate-400 ml-1">(neuf)</span>
                 </td>
               </tr>
             ))}
