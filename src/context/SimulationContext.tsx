@@ -16,9 +16,10 @@ type SimCtx = {
 const SimulationContext = createContext<SimCtx | null>(null)
 
 export function SimulationProvider({ children }: { children: React.ReactNode }) {
-  const first: Simulation = { id: crypto.randomUUID(), ...DEFAULT_SIMULATION }
-  const [simulations, setSimulations] = useState<Simulation[]>([first])
-  const [activeId, setActiveId] = useState(first.id)
+  const [simulations, setSimulations] = useState<Simulation[]>(() => [
+    { id: crypto.randomUUID(), ...DEFAULT_SIMULATION }
+  ])
+  const [activeId, setActiveId] = useState<string>(simulations[0].id)
 
   const active = simulations.find(s => s.id === activeId) ?? simulations[0]
 
