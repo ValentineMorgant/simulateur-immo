@@ -4,16 +4,15 @@ import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
 import { euros } from '../../utils/format'
 
-type TypeBien   = 'tous' | 'appartement' | 'maison'
-type DpeMax = '' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
+type TypeBien = 'tous' | 'appartement' | 'maison'
+type DpeMax   = '' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
 
+// surfaceMin et budget (prixMax) sont dérivés de la simulation — pas dans Criteres
 type Criteres = {
   type:       TypeBien
-  surfaceMin: number
-  surfaceMax: number   // 0 = illimité
-  prixMin:    number
+  surfaceMax: number
   nbPieces:   number
-  nbChambres: number   // 0 = indifférent
+  nbChambres: number
   parking:    boolean
   jardin:     boolean
   balcon:     boolean
@@ -26,29 +25,29 @@ type Criteres = {
 }
 
 const DEFAULT: Criteres = {
-  type: 'tous',
-  surfaceMin: 50, surfaceMax: 0,
-  prixMin: 0,
+  type: 'tous', surfaceMax: 0,
   nbPieces: 3, nbChambres: 0,
   parking: false, jardin: false, balcon: false,
   terrasse: false, cave: false, ascenseur: false, piscine: false,
-  dpeMax: '',
-  ville: '',
+  dpeMax: '', ville: '',
 }
 
 // ─── Builders URL ────────────────────────────────────────────────────────────
 
-type BuildArgs = { budget: number; c: Criteres; typeNotaire: 'ancien' | 'neuf' }
+type BuildArgs = {
+  budget:      number
+  surfaceMin:  number
+  c:           Criteres
+  typeNotaire: 'ancien' | 'neuf'
+}
 
-function buildSeLoger({ budget, c, typeNotaire }: BuildArgs): string {
+function buildSeLoger({ budget, surfaceMin, c, typeNotaire }: BuildArgs): string {
   const types   = c.type === 'appartement' ? '1' : c.type === 'maison' ? '2' : '1,2'
   const surfMax = c.surfaceMax > 0 ? c.surfaceMax : 0
   const parts = [
-    `types=${types}`,
-    'projects=2',
-    'enterprise=0',
-    `price=${c.prixMin}%2F${budget}`,
-    `surface=${c.surfaceMin}%2F${surfMax}`,
+    `types=${types}`, 'projects=2', 'enterprise=0',
+    `price=0%2F${budget}`,
+    `surface=${surfaceMin}%2F${surfMax}`,
     `rooms=${c.nbPieces}`,
     typeNotaire === 'neuf' ? 'isNew=1' : 'isNew=0',
   ]
@@ -65,13 +64,13 @@ function buildSeLoger({ budget, c, typeNotaire }: BuildArgs): string {
   return `https://www.seloger.com/list.htm?${parts.join('&')}`
 }
 
-function buildLeBonCoin({ budget, c, typeNotaire }: BuildArgs): string {
+function buildLeBonCoin({ budget, surfaceMin, c, typeNotaire }: BuildArgs): string {
   const surfMax = c.surfaceMax > 0 ? c.surfaceMax : 9999
   const parts = [
     'category=9',
-    `price=${c.prixMin}-${budget}`,
+    `price=0-${budget}`,
     `rooms=${c.nbPieces}-99`,
-    `surface=${c.surfaceMin}-${surfMax}`,
+    `surface=${surfaceMin}-${surfMax}`,
   ]
   if (c.type === 'appartement') parts.push('real_estate_type[]=2')
   else if (c.type === 'maison') parts.push('real_estate_type[]=1')
@@ -81,14 +80,13 @@ function buildLeBonCoin({ budget, c, typeNotaire }: BuildArgs): string {
   return `https://www.leboncoin.fr/recherche?${parts.join('&')}`
 }
 
-function buildBienIci({ budget, c, typeNotaire }: BuildArgs): string {
+function buildBienIci({ budget, surfaceMin, c, typeNotaire }: BuildArgs): string {
   const location = c.ville
     ? encodeURIComponent(c.ville.toLowerCase().replace(/\s+/g, '-'))
     : 'ile-de-france'
   const parts = [
-    `prix-min=${c.prixMin}`,
     `prix-max=${budget}`,
-    `surface-min=${c.surfaceMin}`,
+    `surface-min=${surfaceMin}`,
     `nb-pieces-min=${c.nbPieces}`,
     typeNotaire === 'neuf' ? 'neuf=true' : 'ancien=true',
   ]
@@ -109,13 +107,12 @@ function buildBienIci({ budget, c, typeNotaire }: BuildArgs): string {
   return `https://www.bienici.com/recherche/achat/${location}?${parts.join('&')}`
 }
 
-function buildLogicImmo({ budget, c, typeNotaire }: BuildArgs): string {
+function buildLogicImmo({ budget, surfaceMin, c, typeNotaire }: BuildArgs): string {
   const location = c.ville ? encodeURIComponent(c.ville.toLowerCase()) : 'ile-de-france,3_0'
   const typeSlug = c.type === 'appartement' ? 'appartement' : c.type === 'maison' ? 'maison' : 'immobilier'
   const parts = [
-    `prix_min=${c.prixMin}`,
     `prix_max=${budget}`,
-    `surface_min=${c.surfaceMin}`,
+    `surface_min=${surfaceMin}`,
     `nb_pieces_min=${c.nbPieces}`,
     typeNotaire === 'neuf' ? 'neuf=1' : 'ancien=1',
   ]
@@ -142,44 +139,27 @@ const PLATFORMS = [
 
 function Toggle({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
+    <button onClick={onClick}
       className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-        active
-          ? 'bg-green-600 text-white border-green-600'
-          : 'bg-white text-slate-500 border-green-200 hover:border-green-400'
+        active ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-500 border-green-200 hover:border-green-400'
       }`}
-    >
-      {label}
-    </button>
+    >{label}</button>
   )
 }
 
-function SurfaceInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  return (
-    <div>
-      <p className="text-xs text-slate-500 mb-1.5">{label}</p>
-      <div className="flex items-center border border-green-200 rounded-lg overflow-hidden focus-within:border-green-400">
-        <input
-          type="number" min={0}
-          value={value || ''}
-          onChange={e => onChange(Number(e.target.value) || 0)}
-          className="flex-1 px-3 py-1.5 text-sm font-bold text-green-900 outline-none bg-transparent"
-        />
-        <span className="px-2 text-xs text-green-600 bg-green-50 self-stretch flex items-center border-l border-green-200">m²</span>
-      </div>
-    </div>
-  )
+const DPE_COLORS: Record<string, string> = {
+  A: 'bg-green-700', B: 'bg-green-500', C: 'bg-lime-400 text-slate-800',
+  D: 'bg-yellow-400 text-slate-800', E: 'bg-orange-400', F: 'bg-orange-600', G: 'bg-red-700',
 }
 
 export function AnnoncesTab() {
   const { active } = useSimulation()
-  const r = calculer(active)
-  const budget = Math.floor(r.prixMaxBien)
+  const r           = calculer(active)
+  const typeNotaire = active.typeNotaire
+  const budget      = Math.floor(r.prixMaxBien)
+  const surfaceMin  = Math.floor(typeNotaire === 'neuf' ? r.surfaceNeuf : r.surfaceAncien)
 
   const [c, setC] = useState<Criteres>(DEFAULT)
-
-  const typeNotaire = active.typeNotaire
 
   function set<K extends keyof Criteres>(key: K, value: Criteres[K]) {
     setC(prev => ({ ...prev, [key]: value }))
@@ -188,34 +168,36 @@ export function AnnoncesTab() {
     setC(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const DPE_LEVELS: DpeMax[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-  const DPE_COLORS: Record<string, string> = {
-    A: 'bg-green-700', B: 'bg-green-500', C: 'bg-lime-400 text-slate-800',
-    D: 'bg-yellow-400 text-slate-800', E: 'bg-orange-400', F: 'bg-orange-600', G: 'bg-red-700',
-  }
+  const args: BuildArgs = { budget, surfaceMin, c, typeNotaire }
 
   return (
     <div className="space-y-4">
 
-      {/* Budget banner */}
-      <div className="bg-white rounded-xl border border-green-200 p-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">Budget max simulé</p>
-          <p className="text-2xl font-extrabold text-green-900">{euros(budget)}</p>
-          <p className="text-xs text-slate-400">
-            {typeNotaire === 'ancien' ? 'Bien ancien — frais notaire 7,5%' : 'Bien neuf — frais notaire 2,5%'}
-          </p>
-        </div>
-        <div className="text-xs text-slate-400 text-right space-y-0.5">
-          <p>Apport : <span className="font-semibold text-slate-600">{euros(active.apport)}</span></p>
-          <p>Emprunt : <span className="font-semibold text-slate-600">{euros(r.capitalMax)}</span></p>
-          <p>Mensualité : <span className="font-semibold text-slate-600">{euros(r.mensualiteMax)}/mois</span></p>
+      {/* Banner — valeurs issues de la simulation */}
+      <div className="bg-white rounded-xl border border-green-200 p-4">
+        <p className="text-xs text-slate-400 uppercase tracking-wide mb-2">Depuis ta simulation</p>
+        <div className="grid grid-cols-3 divide-x divide-green-100">
+          <div className="pr-4">
+            <p className="text-xs text-slate-500">Budget max</p>
+            <p className="text-lg font-extrabold text-green-900">{euros(budget)}</p>
+            <p className="text-xs text-slate-400">frais notaire inclus</p>
+          </div>
+          <div className="px-4">
+            <p className="text-xs text-slate-500">Surface accessible</p>
+            <p className="text-lg font-extrabold text-green-900">{surfaceMin} m²</p>
+            <p className="text-xs text-slate-400">à {(typeNotaire === 'neuf' ? active.prixM2Neuf : active.prixM2Ancien).toLocaleString('fr-FR')} €/m²</p>
+          </div>
+          <div className="pl-4">
+            <p className="text-xs text-slate-500">Ancienneté</p>
+            <p className="text-lg font-extrabold text-green-900 capitalize">{typeNotaire}</p>
+            <p className="text-xs text-slate-400">{typeNotaire === 'ancien' ? 'notaire 7,5%' : 'notaire 2,5%'}</p>
+          </div>
         </div>
       </div>
 
-      {/* Critères */}
+      {/* Critères additionnels */}
       <div className="bg-white rounded-xl border border-green-200 p-4 space-y-5">
-        <h3 className="text-xs font-bold text-green-900">Critères de recherche</h3>
+        <h3 className="text-xs font-bold text-green-900">Critères supplémentaires</h3>
 
         {/* Type de bien */}
         <div>
@@ -230,23 +212,20 @@ export function AnnoncesTab() {
           </div>
         </div>
 
-        {/* Surface */}
-        <div className="grid grid-cols-2 gap-4">
-          <SurfaceInput label="Surface minimum" value={c.surfaceMin} onChange={v => set('surfaceMin', v)} />
-          <SurfaceInput label="Surface maximum" value={c.surfaceMax} onChange={v => set('surfaceMax', v)} />
-        </div>
-
-        {/* Prix min */}
+        {/* Surface max */}
         <div>
-          <p className="text-xs text-slate-500 mb-1.5">Prix minimum <span className="text-slate-300">(budget max = {euros(budget)})</span></p>
+          <p className="text-xs text-slate-500 mb-1.5">
+            Surface maximum
+            <span className="text-slate-300 ml-1">(min = {surfaceMin} m² depuis la simulation)</span>
+          </p>
           <div className="flex items-center border border-green-200 rounded-lg overflow-hidden focus-within:border-green-400">
-            <input
-              type="number" min={0} step={10000}
-              value={c.prixMin || ''}
-              onChange={e => set('prixMin', Number(e.target.value) || 0)}
-              className="flex-1 px-3 py-1.5 text-sm font-bold text-green-900 outline-none bg-transparent"
+            <input type="number" min={0}
+              value={c.surfaceMax || ''}
+              onChange={e => set('surfaceMax', Number(e.target.value) || 0)}
+              placeholder="Illimité"
+              className="flex-1 px-3 py-1.5 text-sm font-bold text-green-900 outline-none bg-transparent placeholder:font-normal placeholder:text-slate-300"
             />
-            <span className="px-2 text-xs text-green-600 bg-green-50 self-stretch flex items-center border-l border-green-200">€</span>
+            <span className="px-2 text-xs text-green-600 bg-green-50 self-stretch flex items-center border-l border-green-200">m²</span>
           </div>
         </div>
 
@@ -292,26 +271,17 @@ export function AnnoncesTab() {
 
         {/* DPE */}
         <div>
-          <p className="text-xs text-slate-500 mb-2">DPE maximum <span className="text-slate-300">(ex. C = biens classés A, B ou C)</span></p>
+          <p className="text-xs text-slate-500 mb-2">DPE maximum <span className="text-slate-300">(ex. C = A, B ou C)</span></p>
           <div className="flex gap-1.5">
-            <button
-              onClick={() => set('dpeMax', '')}
+            <button onClick={() => set('dpeMax', '')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                 c.dpeMax === '' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-500 border-green-200 hover:border-green-400'
-              }`}
-            >
-              Tous
-            </button>
-            {DPE_LEVELS.map(d => (
-              <button
-                key={d}
-                onClick={() => set('dpeMax', d)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-opacity ${DPE_COLORS[d]} text-white ${
-                  c.dpeMax === d ? 'ring-2 ring-offset-1 ring-green-600' : 'opacity-70 hover:opacity-100'
-                }`}
-              >
-                {d}
-              </button>
+              }`}>Tous</button>
+            {(['A','B','C','D','E','F','G'] as DpeMax[]).filter(Boolean).map(d => (
+              <button key={d} onClick={() => set('dpeMax', d)}
+                className={`w-8 h-8 rounded-lg text-xs font-bold ${DPE_COLORS[d!]} text-white transition-opacity ${
+                  c.dpeMax === d ? 'ring-2 ring-offset-1 ring-green-600' : 'opacity-60 hover:opacity-100'
+                }`}>{d}</button>
             ))}
           </div>
         </div>
@@ -320,41 +290,28 @@ export function AnnoncesTab() {
         <div>
           <p className="text-xs text-slate-500 mb-1.5">
             Ville ou arrondissement
-            <span className="text-slate-300 ml-1">(optionnel — Île-de-France par défaut)</span>
+            <span className="text-slate-300 ml-1">(Île-de-France par défaut)</span>
           </p>
-          <input
-            type="text"
-            value={c.ville}
-            onChange={e => set('ville', e.target.value)}
+          <input type="text" value={c.ville} onChange={e => set('ville', e.target.value)}
             placeholder="Paris 15, Boulogne-Billancourt, Vincennes…"
             className="w-full border border-green-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-green-400 text-slate-700 placeholder:text-slate-300"
           />
         </div>
 
-        {/* Reset */}
-        <button
-          onClick={() => setC(DEFAULT)}
-          className="text-xs text-slate-400 hover:text-slate-600 underline"
-        >
-          Réinitialiser les critères
+        <button onClick={() => setC(DEFAULT)} className="text-xs text-slate-400 hover:text-slate-600 underline">
+          Réinitialiser
         </button>
       </div>
 
       {/* Plateformes */}
       <div className="bg-white rounded-xl border border-green-200 p-4">
         <h3 className="text-xs font-bold text-green-900 mb-1">Voir les annonces</h3>
-        <p className="text-xs text-slate-400 mb-3">Tous les critères sont pré-remplis sur chaque plateforme</p>
+        <p className="text-xs text-slate-400 mb-3">Budget, surface et ancienneté pré-remplis depuis ta simulation</p>
         <div className="grid grid-cols-2 gap-3">
           {PLATFORMS.map(p => (
-            <a
-              key={p.id}
-              href={p.build({ budget, c, typeNotaire })}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${p.bg} text-white rounded-lg px-4 py-3 text-center font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2`}
-            >
-              {p.label}
-              <span className="text-xs opacity-75">↗</span>
+            <a key={p.id} href={p.build(args)} target="_blank" rel="noopener noreferrer"
+              className={`${p.bg} text-white rounded-lg px-4 py-3 text-center font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2`}>
+              {p.label} <span className="text-xs opacity-75">↗</span>
             </a>
           ))}
         </div>
