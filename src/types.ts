@@ -16,8 +16,10 @@ export type Simulation = {
   taux: number
   duree: number
   budgetTravaux: number
+  tauxCible: number
   ptzActif: boolean
   ptzMontant: number
+  nbOccupants: number
   prixM2Ancien: number
   prixM2Neuf: number
   dossier: Record<string, boolean>

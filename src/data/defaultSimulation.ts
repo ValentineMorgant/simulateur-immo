@@ -1,5 +1,5 @@
 // src/data/defaultSimulation.ts
-import { Simulation } from '../types'
+import type { Simulation } from '../types'
 
 export const DEFAULT_SIMULATION: Omit<Simulation, 'id'> = {
   nom: 'Charlotte & Valentine',
@@ -11,8 +11,10 @@ export const DEFAULT_SIMULATION: Omit<Simulation, 'id'> = {
   taux: 3.5,
   duree: 25,
   budgetTravaux: 0,
+  tauxCible: 35,
   ptzActif: false,
   ptzMontant: 0,
+  nbOccupants: 2,
   prixM2Ancien: 3500,
   prixM2Neuf: 4500,
   dossier: {},
@@ -30,8 +32,10 @@ export function newSimulation(): Simulation {
     taux: 3.5,
     duree: 25,
     budgetTravaux: 0,
+    tauxCible: 35,
     ptzActif: false,
     ptzMontant: 0,
+    nbOccupants: 2,
     prixM2Ancien: 3500,
     prixM2Neuf: 4500,
     dossier: {},

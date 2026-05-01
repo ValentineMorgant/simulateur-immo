@@ -1,12 +1,12 @@
 // src/utils/calculs.ts
-import { Simulation, Resultats } from '../types'
+import type { Simulation, Resultats } from '../types'
 
 export function calculer(sim: Simulation): Resultats {
   const revenuRetenu1 = sim.acheteur1.revenuFixe + sim.acheteur1.revenuVariable * 0.7
   const revenuRetenu2 = sim.acheteur2.revenuFixe + sim.acheteur2.revenuVariable * 0.7
   const revenusAnnuels = revenuRetenu1 + revenuRetenu2
   const revenusMensuels = revenusAnnuels / 12
-  const mensualiteMax = revenusMensuels * 0.35
+  const mensualiteMax = revenusMensuels * (sim.tauxCible / 100)
 
   const r = sim.taux / 100 / 12
   const n = sim.duree * 12

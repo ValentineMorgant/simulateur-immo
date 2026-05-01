@@ -1,7 +1,7 @@
 // src/utils/calculs.test.ts
 import { describe, it, expect } from 'vitest'
 import { calculer } from './calculs'
-import { Simulation } from '../types'
+import type { Simulation } from '../types'
 
 const BASE: Simulation = {
   id: '1',
@@ -14,8 +14,10 @@ const BASE: Simulation = {
   taux: 3.5,
   duree: 25,
   budgetTravaux: 0,
+  tauxCible: 35,
   ptzActif: false,
   ptzMontant: 0,
+  nbOccupants: 2,
   prixM2Ancien: 3500,
   prixM2Neuf: 4500,
   dossier: {},

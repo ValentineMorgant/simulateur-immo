@@ -91,7 +91,7 @@ export function SecteursTab() {
             <tr>
               <Th label="Ville" k="ville" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
               <th className="px-4 py-2.5 text-left text-xs font-semibold">Ligne(s)</th>
-              <Th label="Trajet" k="trajetMin" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
+              <Th label="Trajet → Auber" k="trajetMin" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
               <Th label="Prix ancien /m²" k="prixAncien" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
               <Th label="Prix neuf /m²" k="prixNeuf" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
               <Th label="Surface accessible" k="surfaceAncien" sortKey={sortKey} sortAsc={sortAsc} onToggle={toggleSort} />
@@ -131,7 +131,7 @@ export function SecteursTab() {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-slate-400 text-center">Prix indicatifs 2024-2025. Surface calculée sur le budget max de la simulation active.</p>
+      <p className="text-xs text-slate-400 text-center">Prix indicatifs 2024-2025. Trajets estimés vers <strong>Auber</strong> (RER A), correspondance incluse. Surface calculée sur le budget max de la simulation active.</p>
     </div>
   )
 }

@@ -1,7 +1,37 @@
 // src/context/SimulationContext.tsx
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import type { Simulation } from '../types'
 import { DEFAULT_SIMULATION, newSimulation } from '../data/defaultSimulation'
+
+const LS_SIMS = 'simulateur-immo:simulations'
+const LS_ACTIVE = 'simulateur-immo:activeId'
+
+function lsGet(key: string): string | null {
+  try { return localStorage.getItem(key) } catch { return null }
+}
+function lsSet(key: string, value: string) {
+  try { localStorage.setItem(key, value) } catch { /* ignore */ }
+}
+
+function migrate(s: Simulation): Simulation {
+  return {
+    tauxCible: 35,
+    nbOccupants: 2,
+    ...s,
+  }
+}
+
+function loadSimulations(): Simulation[] {
+  const raw = lsGet(LS_SIMS)
+  if (raw) try { return (JSON.parse(raw) as Simulation[]).map(migrate) } catch { /* ignore */ }
+  return [{ id: crypto.randomUUID(), ...DEFAULT_SIMULATION }]
+}
+
+function loadActiveId(simulations: Simulation[]): string {
+  const saved = lsGet(LS_ACTIVE)
+  if (saved && simulations.some(s => s.id === saved)) return saved
+  return simulations[0].id
+}
 
 type SimCtx = {
   simulations: Simulation[]
@@ -16,10 +46,16 @@ type SimCtx = {
 const SimulationContext = createContext<SimCtx | null>(null)
 
 export function SimulationProvider({ children }: { children: React.ReactNode }) {
-  const [simulations, setSimulations] = useState<Simulation[]>(() => [
-    { id: crypto.randomUUID(), ...DEFAULT_SIMULATION }
-  ])
-  const [activeId, setActiveId] = useState<string>(simulations[0].id)
+  const [simulations, setSimulations] = useState<Simulation[]>(loadSimulations)
+  const [activeId, setActiveId] = useState<string>(() => loadActiveId(simulations))
+
+  useEffect(() => {
+    lsSet(LS_SIMS, JSON.stringify(simulations))
+  }, [simulations])
+
+  useEffect(() => {
+    lsSet(LS_ACTIVE, activeId)
+  }, [activeId])
 
   const active = simulations.find(s => s.id === activeId) ?? simulations[0]
 

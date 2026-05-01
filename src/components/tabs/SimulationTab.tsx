@@ -1,4 +1,5 @@
 // src/components/tabs/SimulationTab.tsx
+import { useState } from 'react'
 import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
 import { euros } from '../../utils/format'
@@ -58,6 +59,7 @@ function PrixM2Input({ label, value, onChange }: {
 export function SimulationTab() {
   const { active, updateActive } = useSimulation()
   const r = calculer(active)
+  const [showEndettInfo, setShowEndettInfo] = useState(false)
 
   function set<K extends keyof Simulation>(key: K, value: Simulation[K]) {
     updateActive({ [key]: value } as Partial<Simulation>)
@@ -78,7 +80,14 @@ export function SimulationTab() {
       {/* Barre d'endettement */}
       <div className="bg-white rounded-xl border border-green-200 px-5 py-3">
         <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-          <span>Taux d'endettement : <strong className="text-green-600">{r.tauxEndettement.toFixed(1)}%</strong></span>
+          <span className="flex items-center gap-1.5">
+            Taux d'endettement : <strong className="text-green-600">{r.tauxEndettement.toFixed(1)}%</strong>
+            <button
+              onClick={() => setShowEndettInfo(v => !v)}
+              className="w-4 h-4 rounded-full bg-slate-200 text-slate-500 hover:bg-green-100 hover:text-green-700 flex items-center justify-center text-xs font-bold leading-none transition-colors"
+              title="Qu'est-ce que le taux d'endettement ?"
+            >ℹ</button>
+          </span>
           <span>Limite bancaire : <strong>35%</strong></span>
         </div>
         <div className="h-2.5 bg-green-100 rounded-full relative">
@@ -88,15 +97,40 @@ export function SimulationTab() {
           />
           <div className="absolute top-[-3px] h-4 w-0.5 bg-red-400 rounded" style={{ left: `${(35 / 50) * 100}%` }} />
         </div>
-        <div className="flex justify-between text-xs text-slate-300 mt-0.5">
-          <span>0%</span><span className="text-red-400">35% ↑</span><span>50%</span>
+        <div className="relative text-xs text-slate-300 mt-0.5 h-4">
+          <span className="absolute left-0">0%</span>
+          <span className="absolute text-red-400" style={{ left: `${(35 / 50) * 100}%`, transform: 'translateX(-50%)' }}>35% ↑</span>
+          <span className="absolute right-0">50%</span>
         </div>
+        {showEndettInfo && (
+          <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-slate-600 space-y-1.5">
+            <p className="font-semibold text-blue-800">Qu'est-ce que le taux d'endettement ?</p>
+            <p>C'est la part de vos revenus nets mensuels consacrée au remboursement de crédit.</p>
+            <p className="font-mono bg-white border border-blue-100 rounded px-2 py-1 text-slate-700">
+              Taux = mensualité ÷ revenus mensuels × 100
+            </p>
+            <p>
+              Ici : <strong>{euros(r.mensualiteMax)}/mois</strong> ÷ <strong>{euros(r.revenusMensuels)}/mois</strong> = <strong className="text-green-700">{r.tauxEndettement.toFixed(1)}%</strong>
+            </p>
+            <p className="text-slate-500">
+              Depuis janvier 2022, le <strong>Haut Conseil de Stabilité Financière (HCSF)</strong> impose aux banques de ne pas dépasser <strong>35%</strong> (charges d'assurance incluses). Ce simulateur calcule votre capacité maximale à ce plafond.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Paramètres */}
         <div className="bg-white rounded-xl border border-green-200 p-4">
           <h3 className="text-xs font-bold text-green-900 mb-4">Paramètres du prêt</h3>
+          <Slider label="Taux d'endettement cible" value={active.tauxCible} min={20} max={45} step={0.5}
+            onChange={v => set('tauxCible', v)} fmt={v => {
+              if (v > 35) return v.toFixed(1) + ' % ⚠'
+              return v.toFixed(1) + ' %'
+            }} />
+          {active.tauxCible > 35 && (
+            <p className="text-xs text-amber-600 -mt-3 mb-3">Au-dessus de la limite HCSF (35%) — certaines banques acceptent jusqu'à 40% pour les hauts revenus.</p>
+          )}
           <Slider label="Taux d'intérêt" value={active.taux} min={0.5} max={6} step={0.05}
             onChange={v => set('taux', v)} fmt={v => v.toFixed(2) + ' %'} />
           <Slider label="Durée" value={active.duree} min={5} max={30} step={1}
@@ -107,8 +141,8 @@ export function SimulationTab() {
             onChange={v => set('budgetTravaux', v)} fmt={v => v.toLocaleString('fr-FR') + ' €'} />
 
           <div className="border-t border-green-100 pt-3 mt-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-slate-500">Prêt à Taux Zéro (PTZ)</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-slate-600">Prêt à Taux Zéro (PTZ)</span>
               <button
                 onClick={() => set('ptzActif', !active.ptzActif)}
                 className={`w-10 h-5 rounded-full relative transition-colors ${active.ptzActif ? 'bg-green-600' : 'bg-slate-200'}`}
@@ -120,9 +154,68 @@ export function SimulationTab() {
               <Slider label="Montant PTZ" value={active.ptzMontant} min={0} max={100000} step={1000}
                 onChange={v => set('ptzMontant', v)} fmt={v => v.toLocaleString('fr-FR') + ' €'} />
             )}
-            {!active.ptzActif && (
-              <p className="text-xs text-slate-400">Activer si éligible (neuf, primo-accédant, zone A/B)</p>
-            )}
+            <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-xs text-slate-600 space-y-1.5 mt-1">
+              <p className="font-semibold text-amber-800">Conditions d'éligibilité au PTZ</p>
+              <ul className="space-y-1 text-slate-600">
+                <li className="flex gap-1.5"><span className="text-amber-500 flex-shrink-0">●</span><span><strong>Primo-accédant</strong> — ne pas avoir été propriétaire de sa résidence principale durant les 2 dernières années</span></li>
+                <li className="flex gap-1.5"><span className="text-amber-500 flex-shrink-0">●</span><span><strong>Logement neuf</strong> en zone A, A<sub>bis</sub> ou B1 — ou ancien avec travaux importants en zone B2/C</span></li>
+                <li className="flex gap-1.5"><span className="text-amber-500 flex-shrink-0">●</span><span><strong>Résidence principale</strong> — le bien doit être occupé dans l'année suivant l'achat</span></li>
+                <li className="flex gap-1.5"><span className="text-amber-500 flex-shrink-0">●</span><span><strong>Plafonds de revenus</strong> (revenu fiscal de référence N-2) — ex. 2 personnes en zone A : 57 000 €/an max</span></li>
+              </ul>
+              <p className="text-slate-500 pt-0.5">
+                L'Île-de-France est classée en zone <strong>A / A<sub>bis</sub></strong>. Le PTZ peut financer jusqu'à <strong>40 %</strong> du coût total du bien neuf.
+                <a
+                  href="https://www.service-public.fr/particuliers/vosdroits/F10871"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-1 text-blue-600 underline hover:text-blue-800"
+                >service-public.fr ↗</a>
+              </p>
+
+              {/* Calculateur PTZ */}
+              <div className="border-t border-amber-200 pt-2 mt-1 space-y-2">
+                <p className="font-semibold text-amber-800">Estimer mon PTZ — zone A/A<sub>bis</sub> (IDF)</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-slate-500">Nb d'occupants :</span>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button
+                      key={n}
+                      onClick={() => set('nbOccupants', n)}
+                      className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${
+                        active.nbOccupants === n
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-white border border-amber-200 text-slate-500 hover:border-amber-400'
+                      }`}
+                    >
+                      {n === 5 ? '5+' : n}
+                    </button>
+                  ))}
+                </div>
+                {(() => {
+                  const plafonds = [0, 150000, 210000, 255000, 300000, 345000]
+                  const plafond = plafonds[Math.min(active.nbOccupants, 5)]
+                  const ptzEstime = Math.round(plafond * 0.40)
+                  return (
+                    <div className="bg-white rounded-lg border border-amber-200 px-3 py-2 flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-slate-500">PTZ estimé (40% × {plafond.toLocaleString('fr-FR')} €)</p>
+                        <p className="text-lg font-extrabold text-amber-700">{ptzEstime.toLocaleString('fr-FR')} €</p>
+                        <p className="text-slate-400 text-xs">Plafond indicatif 2024 — zone A/A<sub>bis</sub></p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          set('ptzMontant', ptzEstime)
+                          if (!active.ptzActif) set('ptzActif', true)
+                        }}
+                        className="flex-shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg px-3 py-2 transition-colors"
+                      >
+                        Appliquer
+                      </button>
+                    </div>
+                  )
+                })()}
+              </div>
+            </div>
           </div>
         </div>
 
