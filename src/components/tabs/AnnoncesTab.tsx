@@ -1,8 +1,10 @@
 // src/components/tabs/AnnoncesTab.tsx
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
 import { euros } from '../../utils/format'
+import { VILLES } from '../../data/villes'
+import type { Ville } from '../../data/villes'
 
 type TypeBien = 'tous' | 'appartement' | 'maison'
 type DpeMax   = '' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
@@ -136,6 +138,107 @@ const PLATFORMS = [
 ] as const
 
 // ─── Composant ───────────────────────────────────────────────────────────────
+
+type DeptFilter = '' | '78' | '91' | '92'
+
+function VilleSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [query, setQuery]   = useState(value)
+  const [open, setOpen]     = useState(false)
+  const [dept, setDept]     = useState<DeptFilter>('')
+  const containerRef        = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setQuery(value)
+  }, [value])
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const filtered = VILLES.filter(v =>
+    (dept === '' || v.dept === dept) &&
+    (query === '' || v.nom.toLowerCase().includes(query.toLowerCase()))
+  ).sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+
+  function select(v: Ville) {
+    onChange(v.nom)
+    setQuery(v.nom)
+    setOpen(false)
+  }
+
+  function clear() {
+    onChange('')
+    setQuery('')
+  }
+
+  const DEPT_LABELS: { id: DeptFilter; label: string }[] = [
+    { id: '', label: 'Tous' },
+    { id: '92', label: '92 — Hauts-de-Seine' },
+    { id: '91', label: '91 — Essonne' },
+    { id: '78', label: '78 — Yvelines' },
+  ]
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="flex items-center border border-green-200 rounded-lg overflow-hidden focus-within:border-green-400 bg-white">
+        <input
+          type="text"
+          value={query}
+          onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true) }}
+          onFocus={() => setOpen(true)}
+          placeholder="Choisir une ville…"
+          className="flex-1 px-3 py-1.5 text-sm outline-none text-slate-700 placeholder:text-slate-300 bg-transparent"
+        />
+        {query && (
+          <button onClick={clear} className="px-2 text-slate-300 hover:text-slate-500 text-base leading-none">×</button>
+        )}
+      </div>
+
+      {open && (
+        <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white border border-green-200 rounded-xl shadow-lg overflow-hidden">
+          {/* Filtre département */}
+          <div className="flex border-b border-green-100">
+            {DEPT_LABELS.map(d => (
+              <button
+                key={d.id}
+                onClick={() => setDept(d.id)}
+                className={`flex-1 py-1.5 text-xs font-semibold transition-colors ${
+                  dept === d.id ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-green-50'
+                }`}
+              >
+                {d.id === '' ? 'Tous' : d.id}
+              </button>
+            ))}
+          </div>
+
+          {/* Liste */}
+          <div className="max-h-52 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <p className="text-xs text-slate-400 px-3 py-3 text-center">Aucune ville trouvée</p>
+            ) : (
+              filtered.map(v => (
+                <button
+                  key={v.nom}
+                  onClick={() => select(v)}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-green-50 flex items-center justify-between group"
+                >
+                  <span className={value === v.nom ? 'font-semibold text-green-700' : 'text-slate-700'}>{v.nom}</span>
+                  <span className="text-xs text-slate-300 group-hover:text-slate-400">{v.dept}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function Toggle({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
@@ -289,13 +392,10 @@ export function AnnoncesTab() {
         {/* Localisation */}
         <div>
           <p className="text-xs text-slate-500 mb-1.5">
-            Ville ou arrondissement
-            <span className="text-slate-300 ml-1">(Île-de-France par défaut)</span>
+            Ville
+            <span className="text-slate-300 ml-1">(78, 91, 92 — Île-de-France par défaut)</span>
           </p>
-          <input type="text" value={c.ville} onChange={e => set('ville', e.target.value)}
-            placeholder="Paris 15, Boulogne-Billancourt, Vincennes…"
-            className="w-full border border-green-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-green-400 text-slate-700 placeholder:text-slate-300"
-          />
+          <VilleSelect value={c.ville} onChange={v => set('ville', v)} />
         </div>
 
         <button onClick={() => setC(DEFAULT)} className="text-xs text-slate-400 hover:text-slate-600 underline">
