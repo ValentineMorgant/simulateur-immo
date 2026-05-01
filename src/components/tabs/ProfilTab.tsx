@@ -1,4 +1,5 @@
 // src/components/tabs/ProfilTab.tsx
+import { useState } from 'react'
 import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
 import { euros } from '../../utils/format'
@@ -42,11 +43,38 @@ function TextInput({ label, value, onChange }: {
   )
 }
 
+const COEFF_CADRE = 0.775
+
 function AcheteurCard({ num, data, onChange }: {
   num: 1 | 2
   data: AcheteurData
   onChange: (d: AcheteurData) => void
 }) {
+  const [brutFixe, setBrutFixe] = useState('')
+  const [brutVariable, setBrutVariable] = useState('')
+
+  function handleBrutFixe(brut: string) {
+    setBrutFixe(brut)
+    const n = Number(brut)
+    if (n > 0) onChange({ ...data, revenuFixe: Math.round(n * COEFF_CADRE) })
+  }
+
+  function handleBrutVariable(brut: string) {
+    setBrutVariable(brut)
+    const n = Number(brut)
+    if (n > 0) onChange({ ...data, revenuVariable: Math.round(n * COEFF_CADRE) })
+  }
+
+  function handleNetFixe(v: number) {
+    setBrutFixe('')
+    onChange({ ...data, revenuFixe: v })
+  }
+
+  function handleNetVariable(v: number) {
+    setBrutVariable('')
+    onChange({ ...data, revenuVariable: v })
+  }
+
   const revenuRetenu = data.revenuFixe + data.revenuVariable * 0.7
   return (
     <div className="bg-white rounded-xl p-4 border border-green-200">
@@ -55,11 +83,41 @@ function AcheteurCard({ num, data, onChange }: {
         Acheteur·se {num}
       </h3>
       <TextInput label="Prénom" value={data.nom} onChange={v => onChange({ ...data, nom: v })} />
-      <NumInput label="Revenu fixe annuel net" value={data.revenuFixe} onChange={v => onChange({ ...data, revenuFixe: v })} />
-      <NumInput label="Revenu variable annuel" value={data.revenuVariable} onChange={v => onChange({ ...data, revenuVariable: v })} />
+
+      <div className="mb-3">
+        <label className="block text-xs text-slate-400 uppercase tracking-wide mb-1">Brut fixe annuel →</label>
+        <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 overflow-hidden focus-within:border-green-300 mb-1.5">
+          <input
+            type="number"
+            value={brutFixe}
+            placeholder="ex: 50 000"
+            onChange={e => handleBrutFixe(e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm text-slate-600 bg-transparent outline-none"
+          />
+          <span className="px-3 text-xs text-slate-400">€ brut</span>
+        </div>
+        <NumInput label="Net fixe annuel" value={data.revenuFixe} onChange={handleNetFixe} />
+      </div>
+
+      <div className="mb-3">
+        <label className="block text-xs text-slate-400 uppercase tracking-wide mb-1">Brut variable annuel →</label>
+        <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 overflow-hidden focus-within:border-green-300 mb-1.5">
+          <input
+            type="number"
+            value={brutVariable}
+            placeholder="ex: 5 000"
+            onChange={e => handleBrutVariable(e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm text-slate-600 bg-transparent outline-none"
+          />
+          <span className="px-3 text-xs text-slate-400">€ brut</span>
+        </div>
+        <NumInput label="Net variable annuel" value={data.revenuVariable} onChange={handleNetVariable} />
+      </div>
+
       <div className="bg-green-50 rounded-lg px-3 py-2 text-xs text-slate-500 mt-1">
         Revenu retenu : <strong className="text-green-900">{euros(revenuRetenu)} / an</strong>
         {data.revenuVariable > 0 && <span className="block mt-0.5 text-slate-400">(variable compté à 70%)</span>}
+        <span className="block mt-0.5 text-slate-400">Coefficient cadre : 77,5%</span>
       </div>
     </div>
   )
