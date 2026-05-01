@@ -8,7 +8,7 @@ const LS_SIMS = 'simulateur-immo:simulations'
 const LS_ACTIVE = 'simulateur-immo:activeId'
 
 function migrate(s: Simulation): Simulation {
-  return { tauxCible: 35, nbOccupants: 2, ...s }
+  return { ...s, tauxCible: s.tauxCible ?? 35, nbOccupants: s.nbOccupants ?? 2 }
 }
 
 function lsReadAndClear(): { simulations: Simulation[]; activeId: string } | null {
@@ -42,7 +42,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const [activeId, setActiveId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const skipSync = useRef(false)
-  const syncTimer = useRef<ReturnType<typeof setTimeout>>()
+  const syncTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     async function init() {
