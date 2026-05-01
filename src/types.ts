@@ -18,6 +18,7 @@ export type Simulation = {
   budgetTravaux: number
   tauxCible: number
   tauxAssurance: number
+  typeNotaire: 'ancien' | 'neuf'
   ptzActif: boolean
   ptzMontant: number
   nbOccupants: number
