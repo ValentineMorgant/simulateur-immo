@@ -74,7 +74,7 @@ export function SimulationTab() {
         <Kpi label="Capacité d'emprunt" value={euros(r.capitalMax)} />
         <Kpi label="Mensualité" value={euros(r.mensualiteMax) + '/mois'} sub={`dont assurance ${euros(r.mensualiteAssurance)}`} />
         <Kpi label="Taux d'endettement" value={r.tauxEndettement.toFixed(1) + ' %'} sub="/ 35% max" />
-        <Kpi label="Prix max du bien" value={euros(r.prixMaxBien)} sub={`apport inclus${active.budgetTravaux > 0 ? ', travaux déduits' : ''}`} />
+        <Kpi label="Prix max du bien" value={euros(r.prixMaxBien)} sub={`frais notaire ${active.typeNotaire === 'ancien' ? '7,5%' : '2,5%'} inclus`} />
       </div>
 
       {/* Barre d'endettement */}
@@ -137,6 +137,29 @@ export function SimulationTab() {
             onChange={v => set('tauxAssurance', v)} fmt={v => v.toFixed(2) + ' %/an'} />
           <Slider label="Durée" value={active.duree} min={5} max={30} step={1}
             onChange={v => set('duree', v)} fmt={v => v + ' ans'} />
+          <div className="mb-4">
+            <div className="flex justify-between text-xs mb-2">
+              <span className="text-slate-500">Type de bien</span>
+              <span className="text-green-600 font-semibold text-xs">
+                {active.typeNotaire === 'ancien' ? 'Frais notaire 7,5%' : 'Frais notaire 2,5%'}
+              </span>
+            </div>
+            <div className="flex rounded-lg overflow-hidden border border-green-200">
+              {(['ancien', 'neuf'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => set('typeNotaire', t)}
+                  className={`flex-1 py-1.5 text-xs font-semibold transition-colors ${
+                    active.typeNotaire === t
+                      ? 'bg-green-600 text-white'
+                      : 'bg-white text-slate-500 hover:bg-green-50'
+                  }`}
+                >
+                  {t === 'ancien' ? 'Ancien (7,5%)' : 'Neuf (2,5%)'}
+                </button>
+              ))}
+            </div>
+          </div>
           <Slider label="Apport" value={active.apport} min={0} max={200000} step={1000}
             onChange={v => set('apport', v)} fmt={v => v.toLocaleString('fr-FR') + ' €'} />
           <Slider label="Budget travaux" value={active.budgetTravaux} min={0} max={100000} step={1000}
@@ -229,7 +252,12 @@ export function SimulationTab() {
               { label: 'ANCIEN', prixM2: active.prixM2Ancien, surface: r.surfaceAncien, key: 'prixM2Ancien' as const, fraisNotaire: r.fraisNotaireAncien, tauxNotaire: '7,5%' },
               { label: 'NEUF',   prixM2: active.prixM2Neuf,   surface: r.surfaceNeuf,   key: 'prixM2Neuf' as const,   fraisNotaire: r.fraisNotaireNeuf,   tauxNotaire: '2,5%' },
             ].map(col => (
-              <div key={col.label} className="bg-green-50 rounded-lg p-3 text-center">
+              <div key={col.label} className={`rounded-lg p-3 text-center transition-colors ${
+                (col.label === 'ANCIEN' && active.typeNotaire === 'ancien') ||
+                (col.label === 'NEUF'   && active.typeNotaire === 'neuf')
+                  ? 'bg-green-100 border-2 border-green-400'
+                  : 'bg-green-50 border-2 border-transparent'
+              }`}>
                 <p className="text-xs font-semibold text-slate-500 mb-2">{col.label}</p>
                 <PrixM2Input label="Prix/m²" value={col.prixM2} onChange={v => set(col.key, v)} />
                 <p className="text-xs text-slate-500 mt-2">Surface accessible</p>
