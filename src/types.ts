@@ -3,6 +3,8 @@ export type AcheteurData = {
   nom: string
   revenuFixe: number
   revenuVariable: number
+  revenuFixeBrut?: number
+  revenuVariableBrut?: number
 }
 
 export type Simulation = {

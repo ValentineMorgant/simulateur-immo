@@ -1,5 +1,4 @@
 // src/components/tabs/ProfilTab.tsx
-import { useState } from 'react'
 import { useSimulation } from '../../context/SimulationContext'
 import { calculer } from '../../utils/calculs'
 import { euros } from '../../utils/format'
@@ -50,29 +49,22 @@ function AcheteurCard({ num, data, onChange }: {
   data: AcheteurData
   onChange: (d: AcheteurData) => void
 }) {
-  const [brutFixe, setBrutFixe] = useState('')
-  const [brutVariable, setBrutVariable] = useState('')
-
   function handleBrutFixe(brut: string) {
-    setBrutFixe(brut)
     const n = Number(brut)
-    if (n > 0) onChange({ ...data, revenuFixe: Math.round(n * COEFF_CADRE) })
+    onChange({ ...data, revenuFixeBrut: n || 0, revenuFixe: n > 0 ? Math.round(n * COEFF_CADRE) : data.revenuFixe })
   }
 
   function handleBrutVariable(brut: string) {
-    setBrutVariable(brut)
     const n = Number(brut)
-    if (n > 0) onChange({ ...data, revenuVariable: Math.round(n * COEFF_CADRE) })
+    onChange({ ...data, revenuVariableBrut: n || 0, revenuVariable: n > 0 ? Math.round(n * COEFF_CADRE) : data.revenuVariable })
   }
 
   function handleNetFixe(v: number) {
-    setBrutFixe('')
-    onChange({ ...data, revenuFixe: v })
+    onChange({ ...data, revenuFixe: v, revenuFixeBrut: 0 })
   }
 
   function handleNetVariable(v: number) {
-    setBrutVariable('')
-    onChange({ ...data, revenuVariable: v })
+    onChange({ ...data, revenuVariable: v, revenuVariableBrut: 0 })
   }
 
   const revenuRetenu = data.revenuFixe + data.revenuVariable * 0.7
@@ -89,7 +81,7 @@ function AcheteurCard({ num, data, onChange }: {
         <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 overflow-hidden focus-within:border-green-300 mb-1.5">
           <input
             type="number"
-            value={brutFixe}
+            value={data.revenuFixeBrut || ''}
             placeholder="ex: 50 000"
             onChange={e => handleBrutFixe(e.target.value)}
             className="flex-1 px-3 py-1.5 text-sm text-slate-600 bg-transparent outline-none"
@@ -104,7 +96,7 @@ function AcheteurCard({ num, data, onChange }: {
         <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 overflow-hidden focus-within:border-green-300 mb-1.5">
           <input
             type="number"
-            value={brutVariable}
+            value={data.revenuVariableBrut || ''}
             placeholder="ex: 5 000"
             onChange={e => handleBrutVariable(e.target.value)}
             className="flex-1 px-3 py-1.5 text-sm text-slate-600 bg-transparent outline-none"
