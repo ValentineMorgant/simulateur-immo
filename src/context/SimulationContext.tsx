@@ -24,11 +24,14 @@ function lsReadAndClear(): { simulations: Simulation[]; activeId: string } | nul
   } catch { return null }
 }
 
+type SyncStatus = 'idle' | 'saving' | 'error'
+
 type SimCtx = {
   simulations: Simulation[]
   activeId: string
   active: Simulation
   loading: boolean
+  syncStatus: SyncStatus
   setActive: (id: string) => void
   addSimulation: () => void
   updateActive: (updates: Partial<Simulation>) => void
@@ -41,6 +44,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const [simulations, setSimulations] = useState<Simulation[]>([])
   const [activeId, setActiveId] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
   const skipSync = useRef(false)
   const syncTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -91,8 +95,17 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     if (loading) return
     if (skipSync.current) { skipSync.current = false; return }
     clearTimeout(syncTimer.current)
-    syncTimer.current = setTimeout(() => {
-      supabase.from('shared_state').upsert({ id: 'shared', simulations, active_id: activeId })
+    syncTimer.current = setTimeout(async () => {
+      setSyncStatus('saving')
+      const { error } = await supabase
+        .from('shared_state')
+        .upsert({ id: 'shared', simulations, active_id: activeId })
+      if (error) {
+        console.error('Supabase sync error:', error)
+        setSyncStatus('error')
+      } else {
+        setSyncStatus('idle')
+      }
     }, 500)
   }, [simulations, activeId, loading])
 
@@ -116,7 +129,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
 
   return (
     <SimulationContext.Provider
-      value={{ simulations, activeId, active, loading, setActive, addSimulation, updateActive, renameSimulation }}
+      value={{ simulations, activeId, active, loading, syncStatus, setActive, addSimulation, updateActive, renameSimulation }}
     >
       {children}
     </SimulationContext.Provider>
