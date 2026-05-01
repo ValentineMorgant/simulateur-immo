@@ -7,15 +7,27 @@ import { ProfilTab } from './components/tabs/ProfilTab'
 import { SimulationTab } from './components/tabs/SimulationTab'
 import { SecteursTab } from './components/tabs/SecteursTab'
 import { DossierTab } from './components/tabs/DossierTab'
+import { useSimulation } from './context/SimulationContext'
 
 type Section = 'profil' | 'simulation' | 'secteurs' | 'dossier'
 
-export default function App() {
+function AppContent() {
+  const { loading } = useSimulation()
   const [section, setSection] = useState<Section>('simulation')
 
+  if (loading) {
+    return (
+      <main className="flex-1 flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-slate-400">Connexion à la base de données…</p>
+        </div>
+      </main>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-green-50 flex flex-col">
-      <AppHeader />
+    <>
       <SimulationBar />
       <SectionTabs active={section} onChange={setSection} />
       <main className="flex-1 p-5">
@@ -24,6 +36,15 @@ export default function App() {
         {section === 'secteurs'   && <SecteursTab />}
         {section === 'dossier'    && <DossierTab />}
       </main>
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-green-50 flex flex-col">
+      <AppHeader />
+      <AppContent />
     </div>
   )
 }
