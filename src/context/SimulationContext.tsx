@@ -8,7 +8,7 @@ const LS_SIMS = 'simulateur-immo:simulations'
 const LS_ACTIVE = 'simulateur-immo:activeId'
 
 function migrate(s: Simulation): Simulation {
-  return { ...s, tauxCible: s.tauxCible ?? 35, nbOccupants: s.nbOccupants ?? 2 }
+  return { ...s, tauxCible: s.tauxCible ?? 35, nbOccupants: s.nbOccupants ?? 2, tauxAssurance: s.tauxAssurance ?? 0.25 }
 }
 
 function lsReadAndClear(): { simulations: Simulation[]; activeId: string } | null {
