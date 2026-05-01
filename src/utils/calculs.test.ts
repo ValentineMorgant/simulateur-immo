@@ -16,6 +16,7 @@ const BASE: Simulation = {
   budgetTravaux: 0,
   tauxCible: 35,
   tauxAssurance: 0.25,
+  typeNotaire: 'ancien',
   ptzActif: false,
   ptzMontant: 0,
   nbOccupants: 2,
@@ -79,12 +80,12 @@ describe('calculer', () => {
   it('déduit le budget travaux du prix max du bien', () => {
     const base = calculer(BASE)
     const withTravaux = calculer({ ...BASE, budgetTravaux: 20000 })
-    expect(withTravaux.prixMaxBien).toBeCloseTo(base.prixMaxBien - 20000, 0)
+    expect(withTravaux.prixMaxBien).toBeCloseTo((base.capitalMax + 30000 - 20000) / 1.075, 0)
   })
 
-  it('prix max bien = capital + apport - travaux', () => {
+  it('prix max bien intègre les frais de notaire (ancien 7.5%)', () => {
     const r = calculer(BASE)
-    expect(r.prixMaxBien).toBeCloseTo(r.capitalMax + 30000, 0)
+    expect(r.prixMaxBien).toBeCloseTo((r.capitalMax + 30000) / 1.075, 0)
   })
 
   it('calcule les surfaces accessibles', () => {
@@ -114,5 +115,19 @@ describe('calculer', () => {
     const n = 25 * 12
     const mensualite = (85550 / 12) * 0.35
     expect(r.capitalMax).toBeCloseTo(mensualite * n, 0)
+  })
+
+  it('frais notaire ancien (7.5%) réduisent le prix max du bien', () => {
+    const r = calculer({ ...BASE, typeNotaire: 'ancien' })
+    const budgetBrut = r.capitalMax + 30000
+    expect(r.prixMaxBien).toBeCloseTo(budgetBrut / 1.075, 0)
+    expect(r.fraisNotaireAncien).toBeCloseTo(r.prixMaxBien * 0.075, -2)
+  })
+
+  it('frais notaire neuf (2.5%) donnent un prix max plus élevé que ancien', () => {
+    const ancien = calculer({ ...BASE, typeNotaire: 'ancien' })
+    const neuf = calculer({ ...BASE, typeNotaire: 'neuf' })
+    expect(neuf.prixMaxBien).toBeGreaterThan(ancien.prixMaxBien)
+    expect(neuf.fraisNotaireNeuf).toBeCloseTo(neuf.prixMaxBien * 0.025, -2)
   })
 })

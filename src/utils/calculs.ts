@@ -21,7 +21,8 @@ export function calculer(sim: Simulation): Resultats {
   const mensualiteAssurance = capitalPret * k
 
   const capitalMax = capitalPret + (sim.ptzActif ? sim.ptzMontant : 0)
-  const prixMaxBien = capitalMax + sim.apport - sim.budgetTravaux
+  const tauxNotaire = sim.typeNotaire === 'neuf' ? 0.025 : 0.075
+  const prixMaxBien = (capitalMax + sim.apport - sim.budgetTravaux) / (1 + tauxNotaire)
 
   const tauxEndettement = revenusMensuels > 0
     ? (mensualiteMax / revenusMensuels) * 100
