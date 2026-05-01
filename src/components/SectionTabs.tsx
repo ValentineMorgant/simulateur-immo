@@ -2,7 +2,7 @@
 import { useSimulation } from '../context/SimulationContext'
 import { DOCUMENTS } from '../types'
 
-type Section = 'profil' | 'simulation' | 'secteurs' | 'dossier'
+type Section = 'profil' | 'simulation' | 'secteurs' | 'annonces' | 'dossier'
 
 type Props = {
   active: Section
@@ -18,6 +18,7 @@ export function SectionTabs({ active, onChange }: Props) {
     { id: 'profil',     label: 'Profil' },
     { id: 'simulation', label: 'Simulation' },
     { id: 'secteurs',   label: 'Secteurs' },
+    { id: 'annonces',   label: 'Annonces' },
     { id: 'dossier',    label: 'Dossier', badge: `${checked}/${total}` },
   ]
 

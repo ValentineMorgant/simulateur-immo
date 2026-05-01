@@ -7,9 +7,10 @@ import { ProfilTab } from './components/tabs/ProfilTab'
 import { SimulationTab } from './components/tabs/SimulationTab'
 import { SecteursTab } from './components/tabs/SecteursTab'
 import { DossierTab } from './components/tabs/DossierTab'
+import { AnnoncesTab } from './components/tabs/AnnoncesTab'
 import { useSimulation } from './context/SimulationContext'
 
-type Section = 'profil' | 'simulation' | 'secteurs' | 'dossier'
+type Section = 'profil' | 'simulation' | 'secteurs' | 'annonces' | 'dossier'
 
 function AppContent() {
   const { loading } = useSimulation()
@@ -34,6 +35,7 @@ function AppContent() {
         {section === 'profil'     && <ProfilTab />}
         {section === 'simulation' && <SimulationTab />}
         {section === 'secteurs'   && <SecteursTab />}
+        {section === 'annonces'   && <AnnoncesTab />}
         {section === 'dossier'    && <DossierTab />}
       </main>
     </>
