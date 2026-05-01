@@ -17,6 +17,7 @@ export type Simulation = {
   duree: number
   budgetTravaux: number
   tauxCible: number
+  tauxAssurance: number
   ptzActif: boolean
   ptzMontant: number
   nbOccupants: number
@@ -29,6 +30,7 @@ export type Resultats = {
   revenusMensuels: number
   revenusAnnuels: number
   mensualiteMax: number
+  mensualiteAssurance: number
   capitalMax: number
   prixMaxBien: number
   tauxEndettement: number
@@ -36,6 +38,8 @@ export type Resultats = {
   interetsTotaux: number
   surfaceAncien: number
   surfaceNeuf: number
+  fraisNotaireAncien: number
+  fraisNotaireNeuf: number
 }
 
 export type DocumentItem = {

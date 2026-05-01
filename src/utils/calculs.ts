@@ -12,7 +12,14 @@ export function calculer(sim: Simulation): Resultats {
   const n = sim.duree * 12
   const facteur = r > 0 ? (1 - Math.pow(1 + r, -n)) / r : n
 
-  const capitalPret = mensualiteMax * facteur
+  // Assurance intégrée dans mensualiteMax (règle HCSF : 35% inclut assurance)
+  // capitalPret = mensualiteMax × facteur / (1 + k × facteur)
+  const k = (sim.tauxAssurance ?? 0) / 100 / 12
+  const capitalPret = facteur > 0
+    ? mensualiteMax * facteur / (1 + k * facteur)
+    : 0
+  const mensualiteAssurance = capitalPret * k
+
   const capitalMax = capitalPret + (sim.ptzActif ? sim.ptzMontant : 0)
   const prixMaxBien = capitalMax + sim.apport - sim.budgetTravaux
 
@@ -26,10 +33,14 @@ export function calculer(sim: Simulation): Resultats {
   const surfaceAncien = sim.prixM2Ancien > 0 ? prixMaxBien / sim.prixM2Ancien : 0
   const surfaceNeuf   = sim.prixM2Neuf   > 0 ? prixMaxBien / sim.prixM2Neuf   : 0
 
+  const fraisNotaireAncien = Math.round(prixMaxBien * 0.075)
+  const fraisNotaireNeuf   = Math.round(prixMaxBien * 0.025)
+
   return {
     revenusMensuels,
     revenusAnnuels,
     mensualiteMax,
+    mensualiteAssurance,
     capitalMax,
     prixMaxBien,
     tauxEndettement,
@@ -37,5 +48,7 @@ export function calculer(sim: Simulation): Resultats {
     interetsTotaux,
     surfaceAncien,
     surfaceNeuf,
+    fraisNotaireAncien,
+    fraisNotaireNeuf,
   }
 }

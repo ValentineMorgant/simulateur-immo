@@ -72,7 +72,7 @@ export function SimulationTab() {
       {/* KPIs */}
       <div className="bg-white rounded-xl border border-green-200 grid grid-cols-4 divide-x divide-green-100">
         <Kpi label="Capacité d'emprunt" value={euros(r.capitalMax)} />
-        <Kpi label="Mensualité" value={euros(r.mensualiteMax) + '/mois'} />
+        <Kpi label="Mensualité" value={euros(r.mensualiteMax) + '/mois'} sub={`dont assurance ${euros(r.mensualiteAssurance)}`} />
         <Kpi label="Taux d'endettement" value={r.tauxEndettement.toFixed(1) + ' %'} sub="/ 35% max" />
         <Kpi label="Prix max du bien" value={euros(r.prixMaxBien)} sub={`apport inclus${active.budgetTravaux > 0 ? ', travaux déduits' : ''}`} />
       </div>
@@ -133,6 +133,8 @@ export function SimulationTab() {
           )}
           <Slider label="Taux d'intérêt" value={active.taux} min={0.5} max={6} step={0.05}
             onChange={v => set('taux', v)} fmt={v => v.toFixed(2) + ' %'} />
+          <Slider label="Assurance emprunteur" value={active.tauxAssurance} min={0.10} max={0.50} step={0.05}
+            onChange={v => set('tauxAssurance', v)} fmt={v => v.toFixed(2) + ' %/an'} />
           <Slider label="Durée" value={active.duree} min={5} max={30} step={1}
             onChange={v => set('duree', v)} fmt={v => v + ' ans'} />
           <Slider label="Apport" value={active.apport} min={0} max={200000} step={1000}
@@ -224,14 +226,18 @@ export function SimulationTab() {
           <h3 className="text-xs font-bold text-green-900 mb-4">Comparatif Ancien / Neuf</h3>
           <div className="grid grid-cols-2 gap-3 mb-4">
             {[
-              { label: 'ANCIEN', prixM2: active.prixM2Ancien, surface: r.surfaceAncien, key: 'prixM2Ancien' as const },
-              { label: 'NEUF',   prixM2: active.prixM2Neuf,   surface: r.surfaceNeuf,   key: 'prixM2Neuf' as const },
+              { label: 'ANCIEN', prixM2: active.prixM2Ancien, surface: r.surfaceAncien, key: 'prixM2Ancien' as const, fraisNotaire: r.fraisNotaireAncien, tauxNotaire: '7,5%' },
+              { label: 'NEUF',   prixM2: active.prixM2Neuf,   surface: r.surfaceNeuf,   key: 'prixM2Neuf' as const,   fraisNotaire: r.fraisNotaireNeuf,   tauxNotaire: '2,5%' },
             ].map(col => (
               <div key={col.label} className="bg-green-50 rounded-lg p-3 text-center">
                 <p className="text-xs font-semibold text-slate-500 mb-2">{col.label}</p>
                 <PrixM2Input label="Prix/m²" value={col.prixM2} onChange={v => set(col.key, v)} />
                 <p className="text-xs text-slate-500 mt-2">Surface accessible</p>
                 <p className="text-2xl font-extrabold text-green-600">{Math.floor(col.surface)} m²</p>
+                <div className="border-t border-green-200 mt-2 pt-2">
+                  <p className="text-xs text-slate-400">Frais de notaire ({col.tauxNotaire})</p>
+                  <p className="text-sm font-semibold text-slate-500">≈ {euros(col.fraisNotaire)}</p>
+                </div>
               </div>
             ))}
           </div>

@@ -15,6 +15,7 @@ const BASE: Simulation = {
   duree: 25,
   budgetTravaux: 0,
   tauxCible: 35,
+  tauxAssurance: 0.25,
   ptzActif: false,
   ptzMontant: 0,
   nbOccupants: 2,
@@ -45,11 +46,28 @@ describe('calculer', () => {
     expect(r.tauxEndettement).toBeCloseTo(35, 1)
   })
 
-  it('calcule le capital max via annuité constante', () => {
+  it('calcule le capital max avec assurance 0.25%', () => {
     const r = calculer(BASE)
-    // facteur ≈ 199.7 pour taux=3.5% sur 25 ans
-    expect(r.capitalMax).toBeGreaterThan(490000)
-    expect(r.capitalMax).toBeLessThan(510000)
+    // Avec assurance, capital inférieur au cas sans assurance (~496k)
+    expect(r.capitalMax).toBeGreaterThan(470000)
+    expect(r.capitalMax).toBeLessThan(490000)
+  })
+
+  it('sans assurance (0%), capital max = mensualiteMax × facteur', () => {
+    const r = calculer({ ...BASE, tauxAssurance: 0 })
+    const revenusMensuels = 85550 / 12
+    const mensualiteMax = revenusMensuels * 0.35
+    const rTaux = 0.035 / 12
+    const n = 25 * 12
+    const facteur = (1 - Math.pow(1 + rTaux, -n)) / rTaux
+    expect(r.capitalMax).toBeCloseTo(mensualiteMax * facteur, 0)
+  })
+
+  it('avec assurance, mensualiteAssurance est positive et cohérente', () => {
+    const r = calculer(BASE)
+    expect(r.mensualiteAssurance).toBeGreaterThan(0)
+    const mensualiteCredit = r.mensualiteMax - r.mensualiteAssurance
+    expect(mensualiteCredit).toBeGreaterThan(0)
   })
 
   it('ajoute le PTZ au capital max si actif', () => {
@@ -75,6 +93,12 @@ describe('calculer', () => {
     expect(r.surfaceNeuf).toBeCloseTo(r.prixMaxBien / 4500, 1)
   })
 
+  it('calcule les frais de notaire', () => {
+    const r = calculer(BASE)
+    expect(r.fraisNotaireAncien).toBeCloseTo(r.prixMaxBien * 0.075, -2)
+    expect(r.fraisNotaireNeuf).toBeCloseTo(r.prixMaxBien * 0.025, -2)
+  })
+
   it('gère revenus nuls sans diviser par zéro', () => {
     const r = calculer({
       ...BASE,
@@ -86,8 +110,7 @@ describe('calculer', () => {
   })
 
   it('gère taux à 0% (prêt in fine)', () => {
-    const r = calculer({ ...BASE, taux: 0 })
-    // facteur = n quand r=0
+    const r = calculer({ ...BASE, tauxAssurance: 0, taux: 0 })
     const n = 25 * 12
     const mensualite = (85550 / 12) * 0.35
     expect(r.capitalMax).toBeCloseTo(mensualite * n, 0)
